@@ -25,6 +25,8 @@ Note: this guide contains instructions on reimplementing [AME-1](https://www.sci
   year={2026}
 }
 ```
+------
+
 
 ## AME-1
 AME-1 is the first work of the AME series, published on *Science Robotics*. The free-access link is provided above in hyperlink. At its core, it uses attention to select footholds, replacing the model-based or heuristic planning methods with an end-to-end module, while achieving generalization to unseen terrains. It uses the velocity-tracking formulation, and solves scalability during multi-terrain training.
@@ -59,3 +61,42 @@ To improve the stability for small quadrupeds (like Go2), making the terrains ea
 
 ### Training quadrupeds with Go1/Spot-like joint configuration
 These robots can generate stronger bursts of motion than ANYmal because of their leg configuration, but they are also more prone to exploiting shank contact. A practical recommendation is to keep the terrain sparse enough that shank collisions do not assist traversal, increase the associated penalties, and, when needed, slightly adjust the colliders to make shank exploitation useless for traversal.
+
+-----
+
+## AME-2 Policy Learning
+
+AME-2 is a systematic "upgrade" of AME-1 to make the controller more agile, scale to more terrains, achieve robot-agnostic rewards, and solve perception uncertainties with neural mapping. We separate the issues of training a teacher policy and building the neural mapping pipeline, and provide a step-by-step roadmap. Upon having these two, training the student is also trivial.
+
+A principle: after each step, verify the thing still works.
+
+### Step 1: using the goal reaching formulation
+This is quite straightforward to do in IsaacLab -- Just use the exisitng goal command here, and use the flat patch sampling function to help sample valid goals. It would still be worth implementing a new command based on that to customize command interface and resample rules.
+
+At the same time, implement the task rewards -- easy for an AI agent today! Then you can verify an MLP goal reaching policy on flat/rough terrains.
+
+### Step 2: rewards, termination, curriculum, in an easy way
+Implement those rewards, termination, curriculum setups should be easy with an agent now. But for safety, you can use large task rewards and relaxed termination conditions, otherwise you cannot tell if the learning part is off or the parameters are bad during debugging.
+
+My own case: I directly used acceleration termination conditions from legged gym to Isaaclab, and found the policy learning is much slower. It turns out that, in Isaaclab, the accelerations can be much larger, so the env just keeps terminating. Do not let this slow down the development.
+
+### Step 3: actor critic implementation
+Now it is the time to implement the policy and the critic! For the policy, it is similar to AME-1, except that we have 32 heads (96 dim in total), and a global feature. For the critic, we use MoE with 16 MLP experts fused via softmax. We also did symmetry augmentation only for the critic losses because optimizing the critic is computationally cheap.
+
+### Step 4: add terrains
+With the AME-2 policy, multi-terrain learning should be stable. That said, start from easy terrains that the robot can 100% pass, but also keep stepping stones.
+
+### Step 5: add domain randomization
+Now we can challenge the learning with domain randomization. Ideally, this should only slow down the learning a bit.
+
+### Step 6: refining
+After verifying the whole stack can train well, the reward weights, termination conditions, terrain parameters can all be tuned to the paper's version. That said, due to potential differences between robots and simulators, this can be better done in a cautious way: do not add everything all at once.
+
+### Extra step: motion tuning
+For humanoids, I found it is still necessary to add two rewards: 1) upper-body joint deviation penalty for arm pose, and 2) ankle orientation penalty. The effects can be seen in: [post1](https://x.com/ChongZitaZhang/status/2032841021067804998), [post 2](https://x.com/ChongZitaZhang/status/2028474390334054739), [post 3](https://x.com/ChongZitaZhang/status/2031728176494190856).
+Intuitively, I also make a terrain-aware weight here (0.1x weight for terrains with big elevation diffs).
+
+------
+## AME-2 Neural Mapping
+
+### tbd: I have not transferred this into IsaacLab. Besides, the old implementation ignores self mesh (with filter on real robot), but now I am think about training with that.
