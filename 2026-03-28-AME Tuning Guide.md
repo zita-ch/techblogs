@@ -4,7 +4,7 @@ Author: Chong Zhang chong.zhang@ai.ethz.ch
 
 Note: this guide contains instructions on reimplementing [AME-1](https://www.science.org/stoken/author-tokens/ST-2851/full) and [AME-2](https://arxiv.org/abs/2601.08485), two works on achieving generalized legged locomotion. It is based on not only my own engineering experience, but also many communications from other researchers and engineers. We plan to release archived codes after AME-2.5 release, which is expected to happen in late 2026.
 
-###s Citations
+### Citations
 
 ```bibtex
 @article{he2025attention,
