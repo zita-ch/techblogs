@@ -78,7 +78,7 @@ At the same time, implement the task rewards -- easy for an AI agent today! Then
 ### Step 2: rewards, termination, curriculum, in an easy way
 Implement those rewards, termination, curriculum setups should be easy with an agent now. But for safety, you can use large task rewards and relaxed termination conditions, otherwise you cannot tell if the learning part is off or the parameters are bad during debugging.
 
-My own case: I directly used acceleration termination conditions from legged gym to Isaaclab, and found the policy learning is much slower. It turns out that, in Isaaclab, the accelerations can be much larger, so the env just keeps terminating. Do not let this slow down the development.
+My own case: I directly used acceleration termination conditions from legged gym to Isaaclab, and found the policy learning is much slower. It turns out that, in Isaaclab, the accelerations can be much larger, so the env just keeps terminating. Do not let this slow down the development. Also, in IsaacLab Anymal asset, the asset (match between link names and meshes is suspicious here) seems off, which leads to bad knee-use behaviors.
 
 ### Step 3: actor critic implementation
 Now it is the time to implement the policy and the critic! For the policy, it is similar to AME-1, except that we have 32 heads (96 dim in total), and a global feature. For the critic, we use MoE with 16 MLP experts fused via softmax. We also did symmetry augmentation only for the critic losses because optimizing the critic is computationally cheap.
