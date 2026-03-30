@@ -45,7 +45,7 @@ So what matters here?
 + Armature. Try to get from the factory or do sys ID, or just use [PACE](https://github.com/leggedrobotics/pace-sim2real) which identifies not only the armature but also many other parameters by aligning sim and real trajectories.
 + Delay. Simulate the delays so that the policy does not die to real-world delays.
 + Friction. Maybe not that important, but worth checking for some motors.
-+ Saturation. Better to get the joint torque-current curve from the factory. If not, try to get a piecewise linear mapping from current to torque, which can also be helpful.
++ Saturation. Better to get the joint torque-current curve from the factory. If not, try to get a piecewise linear mapping from current to torque, which can also be helpful. Also, remember to [clip torques based on joint velocities](https://arxiv.org/abs/2312.17507).
 + Other minor and specific things. For example, some motors have backlash, which can be modeled as a deadzone. Some motors have current limits, bachdrive torque limits, or need a thermal model...
 + Take care of limits in simulation. In some simulators, getting near the position/velocity limits can cause virtual forces that could be exploited by the RL policy.
 + A bit of randomization -- the real motor dynamics also change with temperature, wear, battery voltage, etc.
