@@ -32,7 +32,8 @@ Note: this guide contains instructions on reimplementing [AME-1](https://www.sci
 AME-1 is the first work of the AME series, published on *Science Robotics*. The free-access link is provided above in hyperlink. At its core, it uses attention to select footholds, replacing the model-based or heuristic planning methods with an end-to-end module, while achieving generalization to unseen terrains. It uses the velocity-tracking formulation, and solves scalability during multi-terrain training.
 
 Our video results: https://www.youtube.com/watch?v=GUgwB6WxcFo  
-Independent reimplementation from Shanghai Innovation Institute on Unitree G1: https://www.bilibili.com/video/BV1aQqLBWEcQ
+Independent reimplementation from Shanghai Innovation Institute on Unitree G1: https://www.bilibili.com/video/BV1aQqLBWEcQ .
+Their code is open: https://github.com/SII-FUSC/AME_Locomotion 
 
 ### Before you try it
 A well-established sim-to-real pipeline is expected. AME-1 does not solve sim-to-real transfer, or motion shaping. It can slightly improve exploration on sparse terrains, but do not give high hope to this.
