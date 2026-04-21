@@ -98,6 +98,36 @@ For humanoids, I found it is still necessary to add two rewards: 1) upper-body j
 Intuitively, I also make a terrain-aware weight here (0.1x weight for terrains with big elevation diffs).
 
 ------
-## AME-2 Neural Mapping
+## AME-2 Neural Mapping (and Student)
 
-### tbd: I have not transferred this into IsaacLab. Besides, the old implementation ignores self mesh (with filter on real robot), but now I am think about training with that.
+Neural Mapping part is done via supervised learning, which relatively easier than tuning RL things, and will be OS-ed as well. And this part can be skipped when building the student training pipeline by:
+1) having a local top-down raycaster as a placeholder for camera pointclouds, and 
+2) the model can then be replaced by a dummy function which gives a ground truth from this raycaster as elevation estimations and a constant (like 0.01) as the uncertainty.
+
+Then -- we can revisit neural mapping model training after setting up the whole pipeline.
+
+
+
+### Mapping pipeline
+When implementing the mapping pipeline, we expect to setup a new sensor in isaaclab. We can just play the teacher policy, and add a dummy observation class to trigger this mapping with visualization. Implement these step-by-step with visualization:
+1) pointcloud-> local grids. I used scatter_reduce_ in torch to speed up this. One can add random extra points to verify the local grid projection works. 
+2) local grids -> estimation and uncertainty. Do the dummy way first, and then revisit later how to train a good model.
+3) local estimation -> global mapping. It is pretty simple, the AI should be able to implement that in a GPU-parallel way, but make it avoid defensive programming & magic fixes in the first place if something is off. Again, do visualization for debugging.
+4) global mapping -> locomotion inputs. This is just a query based on current robot pose.
+
+With all these done, you can see in simulation: when you play the teacher policy, a neural map follows the robot. Afterwards, these things can be converted to the observation for the student policy.
+
+
+### Training a mapping model (can be skipped until student training pipeline is done)
+Start from noise free and naive sampling. Given that only a per-frame grids-to-estimation model needs to be trained, this can be easily probed with some offline/online data in a clean way. Afterwards, apply those engineering tricks, such as noise augmentation.
+
+### Learning pipeline
+The learning part can be done by following these steps:
+1) Implement the AME2-LSIO version, skip the teacher part. This can be done and verified quickly.
+2) Add PPO + IL teacher student algorithm, which just requires some minor modification on the ppo.py.
+3) Add randomization for student training.
+
+Usually the student part does not require much tuning -- the behaviors are well constrained by the teacher, and the MDP does not need to be changed.
+
+### Summary of student training and mapping pipeline building
+Try to use dummy placeholders to implement things step by step. Always use visualization to check and debug.
